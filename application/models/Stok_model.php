@@ -309,46 +309,22 @@ class Stok_model extends CI_Model {
 
     function laporan($number, $offset, $mulai, $akhir)
 	{
-        return $this->db->join('user', 'user.id_user = penjualan_master.id_user', 'left')
-						->where('tgl_trx >=', $mulai)
-						->where('tgl_trx <=', $akhir)
-						->order_by('id_pjmaster DESC')
-						->get('penjualan_master', $number, $offset)
-						->result();
+        //TODO : database laporan pencarian
     }
  
     function row_laporan($mulai, $akhir)
 	{
-		return $this->db->join('user', 'user.id_user = penjualan_master.id_user', 'left')
-						->where('tgl_trx >=', $mulai)
-    					->where('tgl_trx <=', $akhir)
-						->get('penjualan_master')
-						->num_rows();
+		//TODO : database laporan
     }
     
     function row_caribrg($search)
     {
-        return $this->db->or_like($search)
-						->get('barang')
-						->num_rows();
+       //TODO : database caribrg per row
     }
 
     function caribrg($batas = null, $offset = null, $search = null)
     {
-        $this->db->from('barang');
-        if($batas != null) {
-			$this->db->limit($batas, $offset);
-        }
-        if ($search != null) {
-           $this->db->or_like($search);
-        }
-        $this->db->join('satuan', 'satuan.id_satuan = barang.satuan', 'left')
-				->order_by('id_barang DESC');
-        $query = $this->db->get();
-     
-        if ($query->num_rows() > 0) {
-            return $query->result();
-        }
+        //TODO : mencari barang database
     }
     
     function detail_trx($no_trx)
@@ -551,8 +527,6 @@ class Stok_model extends CI_Model {
 
     function hasilcari($key)
     {
-        return $this->db->or_like('nama_barang', $key)
-                        ->get('barang')
-                        ->result();
+        //TODO: menampilkan hasil cari barang
     }
 }
