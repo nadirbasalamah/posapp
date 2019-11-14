@@ -10,21 +10,20 @@ class Page extends CI_Controller {
 
 	public function index()
 	{
-		if ($this->session->userdata('akses')) {
-			redirect(base_url('home'));
-		} else {
-			$this->fungsi->template('login');
-		}
+
+		$this->fungsi->template('login');
+		
 	}
 
 	function auth()
 	{
+		//TODO: menambahkan autentikasi untuk kasir
 		$username   = strtolower($this->input->post('username'));
 		$password   = sha1($this->input->post('password'));
 		$result     = $this->stok_model->auth($username, $password);
 		if ($result) {
 			if ($result[0]['status_user'] == 1) {
-				if (($result[0]['akses_user'] == 1) || ($result[0]['akses_user'] == 2)) {
+				if (($result[0]['akses_user'] == 1)) {
 					$sess = array(
 				    	'akses'		=> $result[0]['akses_user'],
 				    	'user'		=> $result[0]['id_user'],
@@ -535,11 +534,7 @@ class Page extends CI_Controller {
 
 	function laporan()
 	{
-		if ($this->session->userdata('akses')) {
-			$this->fungsi->template('laporan');
-		}else{
-			redirect(base_url());
-		}
+		//TODO: membuat laporan penjualan
 	}
 
     function users()
@@ -678,95 +673,12 @@ class Page extends CI_Controller {
 
   	function lihat_laporan()
   	{
-  		if ($this->session->userdata('akses')) {
-  			$idusr = $this->session->userdata('user');
-			if (!$this->uri->segment(3) && !$this->uri->segment(4)){
-				$tgl_mulai  = str_replace('/','-',$this->input->post('mulai'));
-				$tgl_sampai = str_replace('/','-',$this->input->post('sampai'));
-			}else{
-				$tgl_mulai  = $this->uri->segment(3);
-				$tgl_sampai = $this->uri->segment(4);
-			}
-			$tgl_mulai_db = str_replace('-','/',$tgl_mulai);
-			$tgl_sampai_db = str_replace('-','/',$tgl_sampai);
-            $total = $this->stok_model->row_laporan($tgl_mulai_db, $tgl_sampai_db);
-            $config['base_url'] 		= base_url('page/lihat_laporan/'.$tgl_mulai.'/'.$tgl_sampai);
-            $config['total_rows'] 		= $total;
-            $config['per_page'] 		= 10;
-            $config['full_tag_open']    = '<div><ul class="pagination"><li class="page-item page-link"><strong>Halaman : </strong></li>';
-            $config['full_tag_close']   = '</ul></div>';
-          	$config['first_link']       = '<li class="page-item page-link">Awal</li>';
-          	$config['last_link']        = '<li class="page-item page-link">Akhir</li>';
-  	        $config['prev_link']        = '&laquo';
-  	        $config['prev_tag_open']    = '<li class="page-item page-link">';
-  	        $config['prev_tag_close']   = '</li>';
-  	        $config['next_link']        = '&raquo';
-  	        $config['next_tag_open']    = '<li class="page-item page-link">';
-  	        $config['next_tag_close']   = '</li>';
-  	        $config['cur_tag_open']     = '<li class="page-item page-link">';
-  	        $config['cur_tag_close']    = '</li>';
-  	        $config['num_tag_open']     = '<li class="page-item page-link">';
-  	        $config['num_tag_close']    = '</li>';
-            $this->pagination->initialize($config);
-            $from = $this->uri->segment(5);
-            $data = array(
-              	'tgl_mulai' => $tgl_mulai_db,
-              	'tgl_akhir' => $tgl_sampai_db,
-              	'halaman' 	=> $this->pagination->create_links(),
-              	'result'	=> $this->stok_model->laporan($config['per_page'], $from, $tgl_mulai_db, $tgl_sampai_db)
-            );
-            $this->fungsi->template('laporan', $data);
-  		}else{
-  			redirect(base_url());
-  		}
+  		//TODO: lihat laporan
   	}
     
     function search()
     {
-  		if ($this->session->userdata('akses')) {
-            $key = $this->input->get('s'); 
-            $page=$this->input->get('per_page');
-            $cari=array(
-                'kode_barang' => $key,
-                'nama_barang' => $key
-            );
-            $batas = 10;
-            if(!$page){
-                $offset = 0;
-            }else{
-                $offset = $page;
-            }
-            $total = $this->stok_model->row_caribrg($cari);
-            $config['page_query_string']    = TRUE;
-            $config['base_url']             = base_url('page/search?s='.$key);
-            $config['total_rows']           = $total;
-            $config['per_page']             = $batas;
-            $config['uri_segment']          = $page;
-            $config['full_tag_open']        = '<div><ul class="pagination"><li class="page-item page-link"><strong>Halaman : </strong></li>';
-            $config['full_tag_close']       = '</ul></div>';
-            $config['first_link']           = '<li class="page-item page-link">Awal</li>';
-            $config['last_link']            = '<li class="page-item page-link">Akhir</li>';
-            $config['prev_link']            = '&laquo';
-            $config['prev_tag_open']        = '<li class="page-item page-link">';
-            $config['prev_tag_close']       = '</li>';
-            $config['next_link']            = '&raquo';
-            $config['next_tag_open']        = '<li class="page-item page-link">';
-            $config['next_tag_close']       = '</li>';
-            $config['cur_tag_open']         = '<li class="page-item page-link">';
-            $config['cur_tag_close']        = '</li>';
-            $config['num_tag_open']         = '<li class="page-item page-link">';
-            $config['num_tag_close']        = '</li>';
-            $this->pagination->initialize($config);
-            $from = $this->uri->segment(3);
-            $data = array(
-                'cari'      => $key,
-                'halaman'   => $this->pagination->create_links(),
-                'result'    => $this->stok_model->caribrg($batas, $offset, $cari)
-            );
-            $this->fungsi->template('barang', $data);
-  		}else{
-  			redirect(base_url());
-  		}
+  		//TODO: mencari barang
     }
     
     function detail_trx($no_trx)
@@ -1005,16 +917,11 @@ class Page extends CI_Controller {
 
 	function hasilcari()
 	{
-		$key = $this->input->get('q');
-		$data = $this->stok_model->hasilcari($key);
-		foreach ($data as $result) {
-			echo '<a href="'.base_url().'penjualan/addcart/'.$result->id_barang.'/1">'.$result->nama_barang.'</a><br />';
-		}
+		//TODO: hasil pencarian
 	}
 
 	function logout()
 	{
-		session_destroy();
-		redirect(base_url());
+		//TODO: logout
 	}
 }
