@@ -922,6 +922,7 @@ class Page extends CI_Controller {
 
 	function logout()
 	{
+		//Fungsi Logout : Dikerjakan Oleh Rahman
 		session_destroy();
 		redirect(base_url());
 	}
