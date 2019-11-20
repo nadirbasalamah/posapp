@@ -671,8 +671,9 @@ class Page extends CI_Controller {
 		}
     }
 
-  	function lihat_laporan() //Fungsi lihat laporan : Dikerjakan Oleh Erastus
+  	function lihat_laporan() 
   	{
+		  //Fungsi lihat laporan : Dikerjakan Oleh Erastus
 		  //TODO: lihat laporan
 		  if ($this->session->userdata('akses')) {
 			$idusr = $this->session->userdata('user');
