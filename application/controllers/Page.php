@@ -17,13 +17,13 @@ class Page extends CI_Controller {
 
 	function auth()
 	{
-		//TODO: menambahkan autentikasi untuk kasir
+		//Fungsi Login : Dikerjakan Oleh Rahman
 		$username   = strtolower($this->input->post('username'));
 		$password   = sha1($this->input->post('password'));
 		$result     = $this->stok_model->auth($username, $password);
 		if ($result) {
 			if ($result[0]['status_user'] == 1) {
-				if (($result[0]['akses_user'] == 1)) {
+				if (($result[0]['akses_user'] == 1) || ($result[0]['akses_user'] == 2)) {
 					$sess = array(
 				    	'akses'		=> $result[0]['akses_user'],
 				    	'user'		=> $result[0]['id_user'],
