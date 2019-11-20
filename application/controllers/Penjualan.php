@@ -8,29 +8,88 @@ class Penjualan extends CI_Controller {
         $this->load->model('stok_model');
     }
 
-    function cart()
+    function cart() // Dikerjakan Oleh Widi Aditama
     {
-    	//TODO: melakukan pembelian
+    	if ($this->session->userdata('akses')) {
+    		$trx = $this->stok_model->cek_notrx();
+    		if (empty($trx[0]['no_trx'])){
+    			$data['notrx'] = date('Y').date('m').date('d')."1";
+    		}else{
+    			$data['notrx'] = $trx[0]['no_trx']+1;
+    		}
+    		$this->fungsi->template('cart', $data);
+		} else {
+			redirect(base_url());
+		}
     }
 
-    function addcart($id_barang, $qty)
+    function addcart($id_barang, $qty) // Dikerjakan Oleh Widi Aditama
     {
-    	//TODO: melakukan penambahan barang ke dalam cart
+    	if ($this->session->userdata('akses')) {
+            $bmaster = $this->stok_model->lihat_bmaster($id_barang);
+            if ($bmaster->row()->total >= $qty) {
+	    	    $result = $this->stok_model->cart($id_barang);
+                $data = array(
+                    'id_brg'    => $result[0]['id_barang'],
+                    'jml_brg'   => $result[0]['jumlah_barang'],
+                    'id'        => $result[0]['kode_barang'],
+                    'name'      => $result[0]['nama_barang'],
+                    'qty'       => $qty,
+                    'price'     => $result[0]['harga_jual']
+                );
+                $this->cart->insert($data);
+                redirect(base_url('cart'));
+            }else{
+                $this->session->set_flashdata('message', 'Ooopss! Stok Barang Kosong atau Kurang dari Jumlah Order');
+				redirect(base_url('cart'));
+            }
+		} else {
+			redirect(base_url());
+		}
     }
 
-    function updatecart()
+    function updatecart() // Dikerjakan Oleh Widi Aditama
     {
-    	//TODO: update cart
+    	if ($this->session->userdata('akses')) {
+            $bmaster = $this->stok_model->lihat_bmaster($this->input->post('idbrg'));
+            if ($bmaster->row()->total >= $this->input->post('qty')) {
+                $data = array(
+                     'rowid' => $this->input->post('rowid'),
+                     'qty'   => $this->input->post('qty')
+                );
+                $this->cart->update($data);
+                redirect(base_url('cart'));
+            } else {
+                $this->session->set_flashdata('message', 'Ooopss! Kurang dari Jumlah Order');
+				redirect(base_url('cart'));
+            }
+		} else {
+			redirect(base_url());
+		}
     }
 
-	function removecart($row)
+	function removecart($row) // Dikerjakan Oleh Widi Aditama
 	{
-    	//TODO: menghapus barang dari cart
+    	if ($this->session->userdata('akses')) {
+			$data = array(
+                'rowid' => $row, 
+				'qty'   => 0, 
+			);
+			$this->cart->update($data);
+			redirect(base_url('cart'));
+		} else {
+			redirect(base_url());
+		}
 	}
     
-	function cartdestroy()
+	function cartdestroy() // Dikerjakan Oleh Widi Aditama
 	{
-    	//TODO: menghapus cart
+        if ($this->session->userdata('akses')) {
+            $this->cart->destroy();
+            redirect(base_url('cart'));
+        } else {
+            redirect(base_url());
+        }
 	}
 
 	function caribarang()
