@@ -671,9 +671,50 @@ class Page extends CI_Controller {
 		}
     }
 
-  	function lihat_laporan() 
+  	function lihat_laporan()  //Fungsi lihat laporan : Dikerjakan Oleh Erastus
   	{
-		//TODO: Lihat laporan
+		  //TODO: lihat laporan
+		  if ($this->session->userdata('akses')) {
+			$idusr = $this->session->userdata('user');
+		  if (!$this->uri->segment(3) && !$this->uri->segment(4)){
+			  $tgl_mulai  = str_replace('/','-',$this->input->post('mulai'));
+			  $tgl_sampai = str_replace('/','-',$this->input->post('sampai'));
+		  }else{
+			  $tgl_mulai  = $this->uri->segment(3);
+			  $tgl_sampai = $this->uri->segment(4);
+		  }
+		  $tgl_mulai_db = str_replace('-','/',$tgl_mulai);
+		  $tgl_sampai_db = str_replace('-','/',$tgl_sampai);
+		  $total = $this->stok_model->row_laporan($tgl_mulai_db, $tgl_sampai_db);
+		  $config['base_url'] 		= base_url('page/lihat_laporan/'.$tgl_mulai.'/'.$tgl_sampai);
+		  $config['total_rows'] 		= $total;
+		  $config['per_page'] 		= 10;
+		  $config['full_tag_open']    = '<div><ul class="pagination"><li class="page-item page-link"><strong>Halaman : </strong></li>';
+		  $config['full_tag_close']   = '</ul></div>';
+			$config['first_link']       = '<li class="page-item page-link">Awal</li>';
+			$config['last_link']        = '<li class="page-item page-link">Akhir</li>';
+			$config['prev_link']        = '&laquo';
+			$config['prev_tag_open']    = '<li class="page-item page-link">';
+			$config['prev_tag_close']   = '</li>';
+			$config['next_link']        = '&raquo';
+			$config['next_tag_open']    = '<li class="page-item page-link">';
+			$config['next_tag_close']   = '</li>';
+			$config['cur_tag_open']     = '<li class="page-item page-link">';
+			$config['cur_tag_close']    = '</li>';
+			$config['num_tag_open']     = '<li class="page-item page-link">';
+			$config['num_tag_close']    = '</li>';
+		  $this->pagination->initialize($config);
+		  $from = $this->uri->segment(5);
+		  $data = array(
+				'tgl_mulai' => $tgl_mulai_db,
+				'tgl_akhir' => $tgl_sampai_db,
+				'halaman' 	=> $this->pagination->create_links(),
+				'result'	=> $this->stok_model->laporan($config['per_page'], $from, $tgl_mulai_db, $tgl_sampai_db)
+		  );
+		  $this->fungsi->template('laporan', $data);
+		}else{
+			redirect(base_url());
+		}
 	}
     
     function search()
