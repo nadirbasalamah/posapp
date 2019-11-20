@@ -922,6 +922,7 @@ class Page extends CI_Controller {
 
 	function logout()
 	{
-		//TODO: logout
+		session_destroy();
+		redirect(base_url());
 	}
 }
