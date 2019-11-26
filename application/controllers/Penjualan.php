@@ -10,7 +10,7 @@ class Penjualan extends CI_Controller {
 
     function cart()
     {
-    	//TODO: melakukan pembelian
+    	//TODO: melakukan penjualan
     }
 
     function addcart($id_barang, $qty)
@@ -40,6 +40,6 @@ class Penjualan extends CI_Controller {
 
 	function transaction()
 	{
-    	//TODO: melakukan pembelian barang
+		//TODO: penjualan barang
 	}
 }
