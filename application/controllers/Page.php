@@ -119,7 +119,41 @@ class Page extends CI_Controller {
 
 	function input()
 	{
-		//TODO: menambahkan barang baru
+		if ($this->session->userdata('akses')) {
+			$rk = $this->stok_model->kode_kateg($this->input->post('kategori_barang'));
+			$rb = $this->stok_model->idbarang();
+			if (!$rb[0]['id_barang']) {
+				$id_barang = 1;
+			}else{
+				$id_barang = $rb[0]['id_barang']+1;
+			}
+			$barang = array(
+				'kode_barang'		=> $rk[0]['kode_kategori'].date('Y').date('m').date('d').$this->input->post('kategori_barang').$id_barang,
+				'kategori_barang' 	=> $this->input->post('kategori_barang'),
+				'nama_barang' 		=> ucwords($this->input->post('nama_barang')),
+				'satuan' 			=> ucwords($this->input->post('satuan')),
+				'harga_beli' 		=> $this->input->post('harga_beli'),
+				'harga_jual' 		=> $this->input->post('harga_jual'),
+                'tanggal_masuk' 	=> date('Y-m-d'),
+                'waktu_masuk'       => date('h:i:s')
+			);
+            $brgmaster = array (
+                'id_br' => $id_barang,
+                'stok'  => $this->input->post('jumlah_barang'),
+                'tglup' => date('Y-m-d'),
+                'wktup' => date('h:i:s'),
+                'tipe'  => 'masuk'
+            );
+            $bmaster = $this->stok_model->input_bmaster($brgmaster);
+			$brg = $this->stok_model->input($barang);
+			if ($brg && $bmaster) {
+				redirect(base_url('barang'));
+			}else{
+				redirect(base_url('barang'));
+			}
+		}else{
+			redirect(base_url());
+		}
 	}
 
 	function addcat()
