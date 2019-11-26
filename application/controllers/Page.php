@@ -29,12 +29,15 @@ class Page extends CI_Controller {
                         'nama'		=> $result[0]['nama_user'],
 				    	'logged_in' => TRUE
 					);
+					$this->session->set_userdata($sess);
 					redirect(base_url('home'));
 				}
 			}else{
+				$this->session->set_flashdata('message', 'Username Anda '.ucwords($username).' Sedang Dinonaktifkan');
 				redirect(base_url());
 			}
 		} else {
+			$this->session->set_flashdata('message', 'Kombinasi Username atau Password Salah');
 			redirect(base_url());
 		}
 	}
@@ -119,7 +122,7 @@ class Page extends CI_Controller {
 
 	function input()
 	{
-		if ($this->session->userdata('akses')) {
+		if ($this->session->userdata('akses') == 1) {
 			$rk = $this->stok_model->kode_kateg($this->input->post('kategori_barang'));
 			$rb = $this->stok_model->idbarang();
 			if (!$rb[0]['id_barang']) {
@@ -147,9 +150,11 @@ class Page extends CI_Controller {
             $bmaster = $this->stok_model->input_bmaster($brgmaster);
 			$brg = $this->stok_model->input($barang);
 			if ($brg && $bmaster) {
+				$this->session->set_flashdata('message', 'Barang Baru Berhasil Ditambahkan');
 				redirect(base_url('barang'));
 			}else{
-				redirect(base_url('barang'));
+				$this->session->set_flashdata('message', 'Ooopss! Silahkan Ulangi Kembali');
+				redirect(base_url('add'));
 			}
 		}else{
 			redirect(base_url());
