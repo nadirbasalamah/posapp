@@ -17,7 +17,6 @@ class Page extends CI_Controller {
 
 	function auth()
 	{
-		//Fungsi Login : Dikerjakan Oleh Rahman
 		$username   = strtolower($this->input->post('username'));
 		$password   = sha1($this->input->post('password'));
 		$result     = $this->stok_model->auth($username, $password);
@@ -123,43 +122,7 @@ class Page extends CI_Controller {
 
 	function input()
 	{
-		if ($this->session->userdata('akses') == 1) {
-			$rk = $this->stok_model->kode_kateg($this->input->post('kategori_barang'));
-			$rb = $this->stok_model->idbarang();
-			if (!$rb[0]['id_barang']) {
-				$id_barang = 1;
-			}else{
-				$id_barang = $rb[0]['id_barang']+1;
-			}
-			$barang = array(
-				'kode_barang'		=> $rk[0]['kode_kategori'].date('Y').date('m').date('d').$this->input->post('kategori_barang').$id_barang,
-				'kategori_barang' 	=> $this->input->post('kategori_barang'),
-				'nama_barang' 		=> ucwords($this->input->post('nama_barang')),
-				'satuan' 			=> ucwords($this->input->post('satuan')),
-				'harga_beli' 		=> $this->input->post('harga_beli'),
-				'harga_jual' 		=> $this->input->post('harga_jual'),
-                'tanggal_masuk' 	=> date('Y-m-d'),
-                'waktu_masuk'       => date('h:i:s')
-			);
-            $brgmaster = array (
-                'id_br' => $id_barang,
-                'stok'  => $this->input->post('jumlah_barang'),
-                'tglup' => date('Y-m-d'),
-                'wktup' => date('h:i:s'),
-                'tipe'  => 'masuk'
-            );
-            $bmaster = $this->stok_model->input_bmaster($brgmaster);
-			$brg = $this->stok_model->input($barang);
-			if ($brg && $bmaster) {
-				$this->session->set_flashdata('message', 'Barang Baru Berhasil Ditambahkan');
-				redirect(base_url('barang'));
-			}else{
-				$this->session->set_flashdata('message', 'Ooopss! Silahkan Ulangi Kembali');
-				redirect(base_url('add'));
-			}
-		}else{
-			redirect(base_url());
-		}
+		//TODO: menambahkan barang baru
 	}
 
 	function addcat()
@@ -291,30 +254,7 @@ class Page extends CI_Controller {
 
 	function update()
 	{
-		if ($this->session->userdata('akses') == 1) {
-			$id = $this->input->post('id_barang');
-			$rk = $this->stok_model->kode_kateg($this->input->post('kategori_barang'));
-			$data = array(
-				'kode_barang'		=> $rk[0]['kode_kategori'].date('Y').date('m').date('d').$this->input->post('kategori_barang').$id,
-				'kategori_barang' 	=> $this->input->post('kategori_barang'),
-				'nama_barang' 		=> ucwords($this->input->post('nama_barang')),
-				'satuan' 			=> $this->input->post('satuan'),
-				'harga_beli' 		=> $this->input->post('harga_beli'),
-				'harga_jual' 		=> $this->input->post('harga_jual'),
-                'tanggal_masuk'     => date('Y-m-d'),
-                'waktu_masuk'       => date('h:i:s')
-			);
-			$exec = $this->stok_model->update($id, $data);
-			if ($exec) {
-				$this->session->set_flashdata('message', 'Data Barang Berhasil Diubah');
-				redirect(base_url('barang'));
-			}else{
-				$this->session->set_flashdata('message', 'TOoopss! Silahkan Ulangi Kembali');
-				redirect(base_url('edit/'.$id));
-			}
-		}else{
-			redirect(base_url());
-		}
+		//TODO: update barang
 	}
 
 	function editcat($id)
@@ -922,7 +862,6 @@ class Page extends CI_Controller {
 
 	function logout()
 	{
-		//Fungsi Logout : Dikerjakan Oleh Rahman
 		session_destroy();
 		redirect(base_url());
 	}
