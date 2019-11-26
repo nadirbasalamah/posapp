@@ -29,15 +29,12 @@ class Page extends CI_Controller {
                         'nama'		=> $result[0]['nama_user'],
 				    	'logged_in' => TRUE
 					);
-					$this->session->set_userdata($sess);
 					redirect(base_url('home'));
 				}
 			}else{
-				$this->session->set_flashdata('message', 'Username Anda '.ucwords($username).' Sedang Dinonaktifkan');
 				redirect(base_url());
 			}
 		} else {
-			$this->session->set_flashdata('message', 'Kombinasi Username atau Password Salah');
 			redirect(base_url());
 		}
 	}
