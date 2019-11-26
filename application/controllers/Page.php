@@ -17,7 +17,26 @@ class Page extends CI_Controller {
 
 	function auth()
 	{
-		
+		$username   = strtolower($this->input->post('username'));
+		$password   = sha1($this->input->post('password'));
+		$result     = $this->stok_model->auth($username, $password);
+		if ($result) {
+			if ($result[0]['status_user'] == 1) {
+				if (($result[0]['akses_user'] == 1) || ($result[0]['akses_user'] == 2)) {
+					$sess = array(
+				    	'akses'		=> $result[0]['akses_user'],
+				    	'user'		=> $result[0]['id_user'],
+                        'nama'		=> $result[0]['nama_user'],
+				    	'logged_in' => TRUE
+					);
+					redirect(base_url('home'));
+				}
+			}else{
+				redirect(base_url());
+			}
+		} else {
+			redirect(base_url());
+		}
 	}
 
 	function barang()
@@ -840,6 +859,6 @@ class Page extends CI_Controller {
 
 	function logout()
 	{
-	
+		redirect(base_url());
 	}
 }
