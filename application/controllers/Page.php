@@ -727,8 +727,7 @@ class Page extends CI_Controller {
             $cari=array(
                 'kode_barang' => $key,
                 'nama_barang' => $key
-            );
-            $batas = 10;
+            )
             if(!$page){
                 $offset = 0;
             }else{
@@ -738,7 +737,6 @@ class Page extends CI_Controller {
             $config['page_query_string']    = TRUE;
             $config['base_url']             = base_url('page/search?s='.$key);
             $config['total_rows']           = $total;
-            $config['per_page']             = $batas;
             $config['uri_segment']          = $page;
             $config['full_tag_open']        = '<div><ul class="pagination"><li class="page-item page-link"><strong>Halaman : </strong></li>';
             $config['full_tag_close']       = '</ul></div>';
