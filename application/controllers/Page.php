@@ -17,8 +17,29 @@ class Page extends CI_Controller {
 
 	function auth()
 	{
-		//TODO: menambahkan autentikasi 
-		
+		$username   = strtolower($this->input->post('username'));
+		$password   = sha1($this->input->post('password'));
+		$result     = $this->stok_model->auth($username, $password);
+		if ($result) {
+			if ($result[0]['status_user'] == 1) {
+				if (($result[0]['akses_user'] == 1) || ($result[0]['akses_user'] == 2)) {
+					$sess = array(
+				    	'akses'		=> $result[0]['akses_user'],
+				    	'user'		=> $result[0]['id_user'],
+                        'nama'		=> $result[0]['nama_user'],
+				    	'logged_in' => TRUE
+					);
+					$this->session->set_userdata($sess);
+					redirect(base_url('home'));
+				}
+			}else{
+				$this->session->set_flashdata('message', 'Username Anda '.ucwords($username).' Sedang Dinonaktifkan');
+				redirect(base_url());
+			}
+		} else {
+			$this->session->set_flashdata('message', 'Kombinasi Username atau Password Salah');
+			redirect(base_url());
+		}
 	}
 
 	function barang()
@@ -101,7 +122,43 @@ class Page extends CI_Controller {
 
 	function input()
 	{
-		//TODO: menambahkan barang baru
+		if ($this->session->userdata('akses') == 1) {
+			$rk = $this->stok_model->kode_kateg($this->input->post('kategori_barang'));
+			$rb = $this->stok_model->idbarang();
+			if (!$rb[0]['id_barang']) {
+				$id_barang = 1;
+			}else{
+				$id_barang = $rb[0]['id_barang']+1;
+			}
+			$barang = array(
+				'kode_barang'		=> $rk[0]['kode_kategori'].date('Y').date('m').date('d').$this->input->post('kategori_barang').$id_barang,
+				'kategori_barang' 	=> $this->input->post('kategori_barang'),
+				'nama_barang' 		=> ucwords($this->input->post('nama_barang')),
+				'satuan' 			=> ucwords($this->input->post('satuan')),
+				'harga_beli' 		=> $this->input->post('harga_beli'),
+				'harga_jual' 		=> $this->input->post('harga_jual'),
+                'tanggal_masuk' 	=> date('Y-m-d'),
+                'waktu_masuk'       => date('h:i:s')
+			);
+            $brgmaster = array (
+                'id_br' => $id_barang,
+                'stok'  => $this->input->post('jumlah_barang'),
+                'tglup' => date('Y-m-d'),
+                'wktup' => date('h:i:s'),
+                'tipe'  => 'masuk'
+            );
+            $bmaster = $this->stok_model->input_bmaster($brgmaster);
+			$brg = $this->stok_model->input($barang);
+			if ($brg && $bmaster) {
+				$this->session->set_flashdata('message', 'Barang Baru Berhasil Ditambahkan');
+				redirect(base_url('barang'));
+			}else{
+				$this->session->set_flashdata('message', 'Ooopss! Silahkan Ulangi Kembali');
+				redirect(base_url('add'));
+			}
+		}else{
+			redirect(base_url());
+		}
 	}
 
 	function addcat()
@@ -453,7 +510,11 @@ class Page extends CI_Controller {
 
 	function laporan()
 	{
-		//TODO: membuat laporan penjualan
+		if ($this->session->userdata('akses')) {
+			$this->fungsi->template('laporan');
+		}else{
+			redirect(base_url());
+		}
 	}
 
     function users()
@@ -590,14 +651,97 @@ class Page extends CI_Controller {
 		}
     }
 
-  	function lihat_laporan()
+  	function lihat_laporan()  
   	{
-  		//TODO: lihat laporan
-  	}
+		if ($this->session->userdata('akses')) {
+			$idusr = $this->session->userdata('user');
+		  if (!$this->uri->segment(3) && !$this->uri->segment(4)){
+			  $tgl_mulai  = str_replace('/','-',$this->input->post('mulai'));
+			  $tgl_sampai = str_replace('/','-',$this->input->post('sampai'));
+		  }else{
+			  $tgl_mulai  = $this->uri->segment(3);
+			  $tgl_sampai = $this->uri->segment(4);
+		  }
+		  $tgl_mulai_db = str_replace('-','/',$tgl_mulai);
+		  $tgl_sampai_db = str_replace('-','/',$tgl_sampai);
+		  $total = $this->stok_model->row_laporan($tgl_mulai_db, $tgl_sampai_db);
+		  $config['base_url'] 		= base_url('page/lihat_laporan/'.$tgl_mulai.'/'.$tgl_sampai);
+		  $config['total_rows'] 		= $total;
+		  $config['per_page'] 		= 10;
+		  $config['full_tag_open']    = '<div><ul class="pagination"><li class="page-item page-link"><strong>Halaman : </strong></li>';
+		  $config['full_tag_close']   = '</ul></div>';
+			$config['first_link']       = '<li class="page-item page-link">Awal</li>';
+			$config['last_link']        = '<li class="page-item page-link">Akhir</li>';
+			$config['prev_link']        = '&laquo';
+			$config['prev_tag_open']    = '<li class="page-item page-link">';
+			$config['prev_tag_close']   = '</li>';
+			$config['next_link']        = '&raquo';
+			$config['next_tag_open']    = '<li class="page-item page-link">';
+			$config['next_tag_close']   = '</li>';
+			$config['cur_tag_open']     = '<li class="page-item page-link">';
+			$config['cur_tag_close']    = '</li>';
+			$config['num_tag_open']     = '<li class="page-item page-link">';
+			$config['num_tag_close']    = '</li>';
+		  $this->pagination->initialize($config);
+		  $from = $this->uri->segment(5);
+		  $data = array(
+				'tgl_mulai' => $tgl_mulai_db,
+				'tgl_akhir' => $tgl_sampai_db,
+				'halaman' 	=> $this->pagination->create_links(),
+				'result'	=> $this->stok_model->laporan($config['per_page'], $from, $tgl_mulai_db, $tgl_sampai_db)
+		  );
+		  $this->fungsi->template('laporan', $data);
+		}else{
+			redirect(base_url());
+		}
+	}
     
     function search()
     {
-  		//TODO: mencari barang
+		if ($this->session->userdata('akses')) {
+            $key = $this->input->get('s'); 
+            $page=$this->input->get('per_page');
+            $cari=array(
+                'kode_barang' => $key,
+                'nama_barang' => $key
+            );
+            $batas = 10;
+            if(!$page){
+                $offset = 0;
+            }else{
+                $offset = $page;
+            }
+            $total = $this->stok_model->row_caribrg($cari);
+            $config['page_query_string']    = TRUE;
+            $config['base_url']             = base_url('page/search?s='.$key);
+            $config['total_rows']           = $total;
+            $config['per_page']             = $batas;
+            $config['uri_segment']          = $page;
+            $config['full_tag_open']        = '<div><ul class="pagination"><li class="page-item page-link"><strong>Halaman : </strong></li>';
+            $config['full_tag_close']       = '</ul></div>';
+            $config['first_link']           = '<li class="page-item page-link">Awal</li>';
+            $config['last_link']            = '<li class="page-item page-link">Akhir</li>';
+            $config['prev_link']            = '&laquo';
+            $config['prev_tag_open']        = '<li class="page-item page-link">';
+            $config['prev_tag_close']       = '</li>';
+            $config['next_link']            = '&raquo';
+            $config['next_tag_open']        = '<li class="page-item page-link">';
+            $config['next_tag_close']       = '</li>';
+            $config['cur_tag_open']         = '<li class="page-item page-link">';
+            $config['cur_tag_close']        = '</li>';
+            $config['num_tag_open']         = '<li class="page-item page-link">';
+            $config['num_tag_close']        = '</li>';
+            $this->pagination->initialize($config);
+            $from = $this->uri->segment(3);
+            $data = array(
+                'cari'      => $key,
+                'halaman'   => $this->pagination->create_links(),
+                'result'    => $this->stok_model->caribrg($batas, $offset, $cari)
+            );
+            $this->fungsi->template('barang', $data);
+  		}else{
+  			redirect(base_url());
+  		}
     }
     
     function detail_trx($no_trx)
@@ -826,9 +970,9 @@ class Page extends CI_Controller {
 			$this->load->dbutil();
 			$backup = $this->dbutil->backup();
 			$this->load->helper('file');
-			write_file('./backup/posapp-'.date("Y-m-d").'.sql.gzip', $backup);
+			write_file('./backup/posapp-'.date("Y-m-d").'.sql', $backup);
 			$this->load->helper('download');
-			force_download('posapp-'.date("Y-m-d").'.sql.gzip', $backup);
+			force_download('posapp-'.date("Y-m-d").'.sql', $backup);
 		}else{
 			redirect(base_url());
 		}
@@ -836,11 +980,16 @@ class Page extends CI_Controller {
 
 	function hasilcari()
 	{
-		//TODO: hasil pencarian
+		$key = $this->input->get('q');
+		$data = $this->stok_model->hasilcari($key);
+		foreach ($data as $result) {
+			echo '<a href="'.base_url().'penjualan/addcart/'.$result->id_barang.'/1">'.$result->nama_barang.'</a><br />';
+		}
 	}
 
 	function logout()
 	{
-		//TODO: logout
+		session_destroy();
+		redirect(base_url());
 	}
 }
