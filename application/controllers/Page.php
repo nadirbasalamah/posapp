@@ -993,9 +993,9 @@ class Page extends CI_Controller {
 			$this->load->dbutil();
 			$backup = $this->dbutil->backup();
 			$this->load->helper('file');
-			write_file('./backup/posapp-'.date("Y-m-d").'.sql.gzip', $backup);
+			write_file('./backup/posapp-'.date("Y-m-d").'.sql', $backup);
 			$this->load->helper('download');
-			force_download('posapp-'.date("Y-m-d").'.sql.gzip', $backup);
+			force_download('posapp-'.date("Y-m-d").'.sql', $backup);
 		}else{
 			redirect(base_url());
 		}
