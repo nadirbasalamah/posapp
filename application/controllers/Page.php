@@ -533,7 +533,11 @@ class Page extends CI_Controller {
 
 	function laporan()
 	{
-		//TODO: membuat laporan penjualan
+		if ($this->session->userdata('akses')) {
+			$this->fungsi->template('laporan');
+		}else{
+			redirect(base_url());
+		}
 	}
 
     function users()
@@ -670,9 +674,9 @@ class Page extends CI_Controller {
 		}
     }
 
-  	function lihat_laporan()  //Fungsi lihat laporan : Dikerjakan Oleh Erastus
+  	function lihat_laporan()  
   	{
-		  //TODO: lihat laporan
+		  
 		  if ($this->session->userdata('akses')) {
 			$idusr = $this->session->userdata('user');
 		  if (!$this->uri->segment(3) && !$this->uri->segment(4)){
@@ -705,7 +709,7 @@ class Page extends CI_Controller {
 		  $this->pagination->initialize($config);
 		  $from = $this->uri->segment(5);
 		  $data = array(
-				'tgl_mulai' => $tgl_mulai_db,
+				'tgl_mulai' => $tgl_start_db,
 				'tgl_akhir' => $tgl_sampai_db,
 				'halaman' 	=> $this->pagination->create_links(),
 				'result'	=> $this->stok_model->laporan($config['per_page'], $from, $tgl_mulai_db, $tgl_sampai_db)
