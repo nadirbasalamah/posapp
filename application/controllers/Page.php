@@ -721,7 +721,50 @@ class Page extends CI_Controller {
     
     function search()
     {
-  		//TODO: mencari barang
+		if ($this->session->userdata('akses')) {
+            $key = $this->input->get('s'); 
+            $page=$this->input->get('per_page');
+            $cari=array(
+                'kode_barang' => $key,
+                'nama_barang' => $key
+            );
+            $batas = 10;
+            if(!$page){
+                $offset = 0;
+            }else{
+                $offset = $page;
+            }
+            $total = $this->stok_model->row_caribrg($cari);
+            $config['page_query_string']    = TRUE;
+            $config['base_url']             = base_url('page/search?s='.$key);
+            $config['total_rows']           = $total;
+            $config['per_page']             = $batas;
+            $config['uri_segment']          = $page;
+            $config['full_tag_open']        = '<div><ul class="pagination"><li class="page-item page-link"><strong>Halaman : </strong></li>';
+            $config['full_tag_close']       = '</ul></div>';
+            $config['first_link']           = '<li class="page-item page-link">Awal</li>';
+            $config['last_link']            = '<li class="page-item page-link">Akhir</li>';
+            $config['prev_link']            = '&laquo';
+            $config['prev_tag_open']        = '<li class="page-item page-link">';
+            $config['prev_tag_close']       = '</li>';
+            $config['next_link']            = '&raquo';
+            $config['next_tag_open']        = '<li class="page-item page-link">';
+            $config['next_tag_close']       = '</li>';
+            $config['cur_tag_open']         = '<li class="page-item page-link">';
+            $config['cur_tag_close']        = '</li>';
+            $config['num_tag_open']         = '<li class="page-item page-link">';
+            $config['num_tag_close']        = '</li>';
+            $this->pagination->initialize($config);
+            $from = $this->uri->segment(3);
+            $data = array(
+                'cari'      => $key,
+                'halaman'   => $this->pagination->create_links(),
+                'result'    => $this->stok_model->caribrg($batas, $offset, $cari)
+            );
+            $this->fungsi->template('barang', $data);
+  		}else{
+  			redirect(base_url());
+  		}
     }
     
     function detail_trx($no_trx)
