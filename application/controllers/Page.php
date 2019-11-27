@@ -17,7 +17,6 @@ class Page extends CI_Controller {
 
 	function auth()
 	{
-		//Fungsi Login : Dikerjakan Oleh Rahman
 		$username   = strtolower($this->input->post('username'));
 		$password   = sha1($this->input->post('password'));
 		$result     = $this->stok_model->auth($username, $password);
@@ -963,7 +962,6 @@ class Page extends CI_Controller {
 
 	function logout()
 	{
-		//Fungsi Logout : Dikerjakan Oleh Rahman
 		session_destroy();
 		redirect(base_url());
 	}

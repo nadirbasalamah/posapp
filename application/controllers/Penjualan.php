@@ -8,9 +8,9 @@ class Penjualan extends CI_Controller {
         $this->load->model('stok_model');
     }
 
-    function cart() // Dikerjakan Oleh Widi Aditama
+    function cart() 
     {
-    	if ($this->session->userdata('akses')) {
+		if ($this->session->userdata('akses')) {
     		$trx = $this->stok_model->cek_notrx();
     		if (empty($trx[0]['no_trx'])){
     			$data['notrx'] = date('Y').date('m').date('d')."1";
@@ -23,9 +23,9 @@ class Penjualan extends CI_Controller {
 		}
     }
 
-    function addcart($id_barang, $qty) // Dikerjakan Oleh Widi Aditama
+    function addcart($id_barang, $qty) 
     {
-    	if ($this->session->userdata('akses')) {
+		if ($this->session->userdata('akses')) {
             $bmaster = $this->stok_model->lihat_bmaster($id_barang);
             if ($bmaster->row()->total >= $qty) {
 	    	    $result = $this->stok_model->cart($id_barang);
@@ -48,9 +48,9 @@ class Penjualan extends CI_Controller {
 		}
     }
 
-    function updatecart() // Dikerjakan Oleh Widi Aditama
+    function updatecart() 
     {
-    	if ($this->session->userdata('akses')) {
+		if ($this->session->userdata('akses')) {
             $bmaster = $this->stok_model->lihat_bmaster($this->input->post('idbrg'));
             if ($bmaster->row()->total >= $this->input->post('qty')) {
                 $data = array(
@@ -68,9 +68,9 @@ class Penjualan extends CI_Controller {
 		}
     }
 
-	function removecart($row) // Dikerjakan Oleh Widi Aditama
+	function removecart($row) 
 	{
-    	if ($this->session->userdata('akses')) {
+		if ($this->session->userdata('akses')) {
 			$data = array(
                 'rowid' => $row, 
 				'qty'   => 0, 
@@ -82,7 +82,7 @@ class Penjualan extends CI_Controller {
 		}
 	}
     
-	function cartdestroy() // Dikerjakan Oleh Widi Aditama
+	function cartdestroy() 
 	{
         if ($this->session->userdata('akses')) {
             $this->cart->destroy();
@@ -94,13 +94,85 @@ class Penjualan extends CI_Controller {
 
 	function caribarang()
 	{
-    	//TODO: cari barang
+		//TODO: cari barang
+		if ($this->session->userdata('akses')) {
+			if (!empty($this->input->get('s'))){
+                $key = $this->input->get('s'); 
+                $page=$this->input->get('per_page');
+                $cari=array(
+                    'kode_barang' => $key,
+                    'nama_barang' => $key
+                );
+                $batas = 10;
+                if(!$page){
+                    $offset = 0;
+                }else{
+                    $offset = $page;
+                }
+                $total = $this->stok_model->row_caribrg($cari);
+                $config['page_query_string']= TRUE;
+                $config['base_url']         = base_url('penjualan/cari?s='.$key);
+                $config['total_rows']       = $total;
+                $config['per_page']         = $batas;
+                $config['uri_segment']      = $page;
+                $config['full_tag_open']    = '<div><ul class="pagination"><li class="page-item page-link"><strong>Halaman : </strong></li>';
+                $config['full_tag_close']   = '</ul></div>';
+                $config['first_link']       = '<li class="page-item page-link">Awal</li>';
+                $config['last_link']        = '<li class="page-item page-link">Akhir</li>';
+                $config['prev_link']        = '&laquo';
+                $config['prev_tag_open']    = '<li class="page-item page-link">';
+                $config['prev_tag_close']   = '</li>';
+                $config['next_link']        = '&raquo';
+                $config['next_tag_open']    = '<li class="page-item page-link">';
+                $config['next_tag_close']   = '</li>';
+                $config['cur_tag_open']     = '<li class="page-item page-link">';
+                $config['cur_tag_close']    = '</li>';
+                $config['num_tag_open']     = '<li class="page-item page-link">';
+                $config['num_tag_close']    = '</li>';
+                $this->pagination->initialize($config);
+                $from = $this->uri->segment(3);
+                $data = array(
+                    'cari'     => $key,
+                    'halaman'  => $this->pagination->create_links(),
+                    'result'   => $this->stok_model->caribrg($batas, $offset, $cari)
+                );
+                $this->load->view('caribarang', $data);
+            } else {
+                $total = $this->stok_model->row_data_barang();
+                $config['base_url'] 		= base_url('penjualan/caribarang');
+                $config['total_rows'] 		= $total;
+                $config['per_page'] 		= 10;
+                $config['full_tag_open']    = '<div><ul class="pagination"><li class="page-item page-link"><strong>Halaman : </strong></li>';
+                $config['full_tag_close']   = '</ul></div>';
+                $config['first_link']       = '<li class="page-item page-link">Awal</li>';
+                $config['last_link']        = '<li class="page-item page-link">Akhir</li>';
+                $config['prev_link']        = '&laquo';
+                $config['prev_tag_open']    = '<li class="page-item page-link">';
+                $config['prev_tag_close']   = '</li>';
+                $config['next_link']        = '&raquo';
+                $config['next_tag_open']    = '<li class="page-item page-link">';
+                $config['next_tag_close']   = '</li>';
+                $config['cur_tag_open']     = '<li class="page-item page-link">';
+                $config['cur_tag_close']    = '</li>';
+                $config['num_tag_open']     = '<li class="page-item page-link">';
+                $config['num_tag_close']    = '</li>';
+                $this->pagination->initialize($config);
+                $from = $this->uri->segment(3);
+                $data = array(
+                    'halaman'   => $this->pagination->create_links(),
+                    'result'    => $this->stok_model->data_barang($config['per_page'], $from)
+                );
+                $this->load->view('caribarang', $data);
+            }
+        } else {
+			redirect(base_url());
+		}
 	}
 
 	function transaction()
 	{
-		//Fungsi penambahan data barang baru : Dikerjakan Oleh Nadir
-    	if ($this->session->userdata('akses')) {
+		//TODO: penjualan barang
+		if ($this->session->userdata('akses')) {
             $dmaster = array(
                 'id_user'       => $this->session->userdata('user'),
                 'no_trx'        => $this->input->post('notrx'),
