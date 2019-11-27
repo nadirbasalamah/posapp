@@ -676,8 +676,7 @@ class Page extends CI_Controller {
 
   	function lihat_laporan()  
   	{
-		  
-		  if ($this->session->userdata('akses')) {
+		if ($this->session->userdata('akses')) {
 			$idusr = $this->session->userdata('user');
 		  if (!$this->uri->segment(3) && !$this->uri->segment(4)){
 			  $tgl_mulai  = str_replace('/','-',$this->input->post('mulai'));
@@ -709,7 +708,7 @@ class Page extends CI_Controller {
 		  $this->pagination->initialize($config);
 		  $from = $this->uri->segment(5);
 		  $data = array(
-				'tgl_mulai' => $tgl_start_db,
+				'tgl_mulai' => $tgl_mulai_db,
 				'tgl_akhir' => $tgl_sampai_db,
 				'halaman' 	=> $this->pagination->create_links(),
 				'result'	=> $this->stok_model->laporan($config['per_page'], $from, $tgl_mulai_db, $tgl_sampai_db)
